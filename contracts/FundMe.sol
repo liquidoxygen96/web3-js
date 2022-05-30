@@ -7,9 +7,17 @@ contract FundMe {
 
     uint256 public minimumUsd =50 * 1e18;
 
+    //address list to keep track of funders
+    address[] public funders;
+
+    //mapping pointer to show value of contribution based on wallet address
+    mapping(address => uint256) public addressToAmountFunded;
+
     function fund() public payable {
         //minimum fund in usd 
     require(getConversionRate(msg.value) >= minimumUsd, 'Did not send minimum value'); //1 Ether = 1e18 Wei = 1 * 10 ** 18
+    funders.push(msg.sender);
+    addressToAmountFunded[msg.sender] = msg.value;
     }
 
     //get price of Ethereum/USD: needs 1. ABI 2. Address (0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419)
