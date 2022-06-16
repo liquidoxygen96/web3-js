@@ -12,15 +12,15 @@ contract FundMe {
     //mapping pointer for each address showing their value of contribution
     mapping(address => uint256) public addressToAmountFunded;
 
-    address public owner;
+    address public immutable i_owner;
     
     //gets called as soon as contract is deployed 
     constructor() {
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
     
     modifier onlyOwner {
-    	require(msg.sender == owner, "Not owner, transaction will fail");
+    	require(msg.sender == i_owner, "Not owner, transaction will fail");
     	_;
     	}
 
