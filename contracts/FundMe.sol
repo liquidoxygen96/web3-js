@@ -1,25 +1,51 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 
-import "./PriceConverter.sol";
-
+import './PriceConverter.sol';
 contract FundMe {
- //created priceConverter 'library' to do math and import here using
     using PriceConverter for uint256;
 
     uint256 public minimumUsd =50 * 1e18;
 
-    //address list to keep track of funders
+    //address list to keep track of who funds this contract
     address[] public funders;
-
-    //mapping pointer to show value of contribution based on wallet address
+    //mapping pointer for each address showing their value of contribution
     mapping(address => uint256) public addressToAmountFunded;
+
+    address public owner;
+    constructor() {
+        owner = msg.sender;
+    }
 
     function fund() public payable {
         //minimum fund in usd 
-    require(msg.value.getConversionRate() >= minimumUsd, 'Did not send minimum value'); //1 Ether = 1e18 Wei = 1 * 10 ** 18
-    funders.push(msg.sender);
-    addressToAmountFunded[msg.sender] = msg.value;
+        require(msg.value.getConversionRate() >= minimumUsd, 'Did not send minimum value'); //1 Ether = 1e18 Wei = 1 * 10 ** 18
+        funders.push(msg.sender);
+        addressToAmountFunded[msg.sender] += msg.value;
     }
-    
+
+    //make sure that only the contract owner(deployer) can call the withdraw function (using a constructor)
+    function withdraw() public {
+        require(msg.sender == owner, 'sender is not owner');
+        //for loop to index through funders array and make sure the funds are withdrawn properly
+        for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
+
+            address funder =  funders[funderIndex];
+            addressToAmountFunded[funder] = 0;
+        }
+            // reset the array by completely blanking the array 
+        funders = new address[](0);
+
+        //withdraw
+        //Three ways to send native blockchain tokens [transfer, send, call]
+        //payable(msg.sender).transfer(address(this.balance));
+
+        //send method 
+        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
+        //require(sendSuccess, 'Send Failed');
+
+        //call method ( preferred method to withdraw funds from a contract
+        (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(callSuccess, 'Call Failed');
+    }
 }
