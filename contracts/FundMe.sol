@@ -13,9 +13,16 @@ contract FundMe {
     mapping(address => uint256) public addressToAmountFunded;
 
     address public owner;
+    
+    //gets called as soon as contract is deployed 
     constructor() {
         owner = msg.sender;
     }
+    
+    modifier onlyOwner {
+    	require(msg.sender == owner, "Not owner, transaction will fail");
+    	_;
+    	}
 
     function fund() public payable {
         //minimum fund in usd 
@@ -25,8 +32,8 @@ contract FundMe {
     }
 
     //make sure that only the contract owner(deployer) can call the withdraw function (using a constructor)
-    function withdraw() public {
-        require(msg.sender == owner, 'sender is not owner');
+    function withdraw() public onlyOwner{
+        
         //for loop to index through funders array and make sure the funds are withdrawn properly
         for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++){
 
