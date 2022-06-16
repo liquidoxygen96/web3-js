@@ -5,7 +5,7 @@ import './PriceConverter.sol';
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint256 public minimumUsd =50 * 1e18;
+    uint256 public constant MINIMUM_USD =50 * 1e18;
 
     //address list to keep track of who funds this contract
     address[] public funders;
@@ -26,7 +26,7 @@ contract FundMe {
 
     function fund() public payable {
         //minimum fund in usd 
-        require(msg.value.getConversionRate() >= minimumUsd, 'Did not send minimum value'); //1 Ether = 1e18 Wei = 1 * 10 ** 18
+        require(msg.value.getConversionRate() >= MINIMUM_USD, 'Did not send minimum value'); //1 Ether = 1e18 Wei = 1 * 10 ** 18
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] += msg.value;
     }
